@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace WebAppStudent.Models
 {
-   public abstract class DalPeople : IDalPeople
+   public class DalPeople : IDalPeople
    {
       public SqlConnection SqlConnection { get; }
 
@@ -13,7 +13,7 @@ namespace WebAppStudent.Models
       }
 
       public People Add(People model)
-      {         
+      {
          using (SqlCommand command = SqlConnection.CreateCommand())
          {
             command.CommandText = "INSERT INTO People(Name, Active) VALUES(@Name, @Active);SELECT SCOPE_IDENTITY();";
@@ -53,7 +53,7 @@ namespace WebAppStudent.Models
          bool status = false;
          using (SqlCommand command = SqlConnection.CreateCommand())
          {
-            command.CommandText = "DELETE FROM People WHERE Id=@Id";            
+            command.CommandText = "DELETE FROM People WHERE Id=@Id";
             command.Parameters.Add("@Id", System.Data.SqlDbType.Int).Value = id;
             if (SqlConnection.State == System.Data.ConnectionState.Closed) SqlConnection.Open();
             status = command.ExecuteNonQuery() > 0;
@@ -66,7 +66,7 @@ namespace WebAppStudent.Models
       {
          using (SqlCommand command = SqlConnection.CreateCommand())
          {
-            command.CommandText = "SELECT Id, Name, Active FROM People";            
+            command.CommandText = "SELECT Id, Name, Active FROM People";
             if (SqlConnection.State == System.Data.ConnectionState.Closed) SqlConnection.Open();
             using (SqlDataReader reader = command.ExecuteReader())
             {
@@ -84,7 +84,35 @@ namespace WebAppStudent.Models
                }
             }
             if (SqlConnection.State == System.Data.ConnectionState.Open) SqlConnection.Close();
-         }         
+         }
+      }
+
+      public People Find(int id)
+      {
+         People people = null;
+         using (SqlCommand command = SqlConnection.CreateCommand())
+         {
+            command.CommandText = "SELECT Id, Name, Active FROM People WHERE Id=@Id";
+            command.Parameters.Add("@Id", System.Data.SqlDbType.Int).Value = id;
+            if (SqlConnection.State == System.Data.ConnectionState.Closed) SqlConnection.Open();
+            using (SqlDataReader reader = command.ExecuteReader())
+            {
+               if (reader.HasRows)
+               {
+                  if (reader.Read())
+                  {
+                     people = new People()
+                     {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Active = reader.GetBoolean(2)
+                     };
+                  }
+               }
+            }
+            if (SqlConnection.State == System.Data.ConnectionState.Open) SqlConnection.Close();
+         }
+         return people;
       }
    }
 }

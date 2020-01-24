@@ -1,0 +1,31 @@
+﻿@model WebAppStudent.Models.People
+@{
+  ViewData["Title"] = "Novo Registro";
+}
+<h1>Novo Registro</h1>
+<h4>Pessoa</h4>
+<hr />
+@(await Html.PartialAsync("Status"))
+<div class="row">
+  <div class="col-md-12">
+    <form asp-action="Create">
+      <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+      <div class="form-group">
+        <label asp-for="Name" class="control-label">Nome</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+      </div>
+      <div class="form-group form-check">
+        <label class="form-check-label">
+          <input class="form-check-input" asp-for="Active" /> Ativo
+        </label>
+      </div>
+      <div class="form-group">
+        <input type="submit" value="Salvar" class="btn btn-warning" /> | <a asp-action="Index" class="btn btn-info">Voltar</a>
+      </div>
+    </form>
+  </div>
+</div>
+@section Scripts {
+  @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

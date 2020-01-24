@@ -1,0 +1,45 @@
+﻿@model IEnumerable<WebAppStudent.Models.People>
+@{
+  ViewData["Title"] = "Lista de Pessoas";
+}
+<h1>Lista de Pessoas</h1>
+<p class="text-center">
+  <a asp-action="Create" class="btn btn-warning">Novo Registro</a>
+</p>
+<table class="table">
+  <thead>
+    <tr>
+      <th class="text-center">
+        Id
+      </th>
+      <th class="text-center">
+        Nome Completo
+      </th>
+      <th class="text-center">
+        Ativo
+      </th>
+      <th class="text-center">...</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var item in Model)
+    {
+      <tr>
+        <td  class="text-right">
+          @Html.DisplayFor(modelItem => item.Id)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td  class="text-center">
+          @Html.DisplayFor(modelItem => item.Active)
+        </td>
+        <td  class="text-center">
+          @Html.ActionLink("Alterar", "Edit", new { id = item.Id }, new { @class="btn btn-primary" }) |
+          @Html.ActionLink("Detalhes", "Details", new { id = item.Id }, new { @class="btn btn-info" }) |
+          @Html.ActionLink("Excluir", "Delete", new { id = item.Id }, new { @class="btn btn-danger" })
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

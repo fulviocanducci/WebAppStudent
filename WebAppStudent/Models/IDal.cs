@@ -10,5 +10,6 @@ namespace WebAppStudent.Models
       bool Edit(T model);
       bool Delete(int id);
       IEnumerable<T> All();
+      T Find(int id);
    }
 }
