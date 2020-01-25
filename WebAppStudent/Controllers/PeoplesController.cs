@@ -11,7 +11,7 @@ namespace WebAppStudent.Controllers
          DalPeople = dalPeople;
       }
 
-      [HttpGet]
+      [HttpGet]      
       public ActionResult Index()
       {
          return View(DalPeople.All());

@@ -14,37 +14,69 @@ namespace WebAppStudent.Models
 
       public People Add(People model)
       {
-         using (SqlCommand command = SqlConnection.CreateCommand())
+         SqlTransaction transaction = null;
+         if (SqlConnection.State == System.Data.ConnectionState.Closed) SqlConnection.Open();
+         try
          {
-            command.CommandText = "INSERT INTO People(Name, Active) VALUES(@Name, @Active);SELECT SCOPE_IDENTITY();";
-            command.Parameters.Add("@Name", System.Data.SqlDbType.VarChar, 100).Value = model.Name;
-            command.Parameters.Add("@Active", System.Data.SqlDbType.Bit).Value = model.Active;
-            if (SqlConnection.State == System.Data.ConnectionState.Closed)
+            using (transaction = SqlConnection.BeginTransaction())
             {
-               SqlConnection.Open();
-            }
-            if (int.TryParse(command.ExecuteScalar().ToString(), out int id))
-            {
-               model.Id = id;
-            }
+               using (SqlCommand command = SqlConnection.CreateCommand())
+               {
+                  command.Transaction = transaction;
+                  command.CommandText = "INSERT INTO People(Name, Active) VALUES(@Name, @Active);SELECT SCOPE_IDENTITY();";
+                  command.Parameters.Add("@Name", System.Data.SqlDbType.VarChar, 100).Value = model.Name;
+                  command.Parameters.Add("@Active", System.Data.SqlDbType.Bit).Value = model.Active;
+
+                  if (int.TryParse(command.ExecuteScalar().ToString(), out int id))
+                  {
+                     model.Id = id;
+                  }
+               }
+               transaction?.Commit();
+               SqlConnection.Close();
+            }            
          }
-         SqlConnection.Close();
+         catch
+         {
+            transaction?.Rollback();
+         }
+         finally
+         {
+            transaction?.Dispose();
+         }
          return model;
       }
 
       public bool Edit(People model)
       {
          bool status = false;
-         using (SqlCommand command = SqlConnection.CreateCommand())
+         SqlTransaction transaction = null;
+         try
          {
-            command.CommandText = "UPDATE People SET Name=@Name, Active=@Active WHERE Id=@Id";
-            command.Parameters.Add("@Name", System.Data.SqlDbType.VarChar, 100).Value = model.Name;
-            command.Parameters.Add("@Active", System.Data.SqlDbType.Bit).Value = model.Active;
-            command.Parameters.Add("@Id", System.Data.SqlDbType.Int).Value = model.Id;
             if (SqlConnection.State == System.Data.ConnectionState.Closed) SqlConnection.Open();
-            status = command.ExecuteNonQuery() > 0;
+            using (transaction = SqlConnection.BeginTransaction())
+            {
+               using (SqlCommand command = SqlConnection.CreateCommand())
+               {
+                  command.Transaction = transaction;
+                  command.CommandText = "UPDATE People SET Name=@Name, Active=@Active WHERE Id=@Id";
+                  command.Parameters.Add("@Name", System.Data.SqlDbType.VarChar, 100).Value = model.Name;
+                  command.Parameters.Add("@Active", System.Data.SqlDbType.Bit).Value = model.Active;
+                  command.Parameters.Add("@Id", System.Data.SqlDbType.Int).Value = model.Id;
+                  status = command.ExecuteNonQuery() > 0;
+               }
+               transaction.Commit();
+               if (SqlConnection.State == System.Data.ConnectionState.Open) SqlConnection.Close();
+            }
          }
-         if (SqlConnection.State == System.Data.ConnectionState.Open) SqlConnection.Close();
+         catch
+         {
+            transaction?.Rollback();
+         }
+         finally
+         {
+            transaction?.Dispose();
+         }
          return status;
       }
 

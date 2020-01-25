@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,6 +27,11 @@ namespace WebAppStudent
       {
          services.AddScoped(x => new SqlConnection(Configuration.GetConnectionString("StudentsDatabase")));
          services.AddScoped<IDalPeople, DalPeople>();
+         services.AddDbContext<WebAppStudent.Base.MystudentddbContext>(options =>
+         {
+            options.UseSqlServer(Configuration.GetConnectionString("StudentsDatabase"));
+         });
+         services.AddEntityFrameworkSqlServer();
          services.AddControllersWithViews();
       }
 
