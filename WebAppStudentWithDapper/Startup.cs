@@ -19,7 +19,9 @@ namespace WebAppStudentWithDapper
 
       public void ConfigureServices(IServiceCollection services)
       {
-         services.AddScoped<IDbConnection>(x => new SqlConnection(Configuration.GetConnectionString("StudentsDatabase")));
+         services.AddScoped<IDbConnection>(x => 
+            new SqlConnection(Configuration.GetConnectionString("StudentsDatabase"))
+         );
          services.AddControllersWithViews();
       }
 
