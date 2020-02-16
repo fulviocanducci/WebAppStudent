@@ -113,7 +113,7 @@ namespace WebAppStudentWithDapper.Controllers
          try
          {
             People model = await Connection.GetAsync<People>(id);
-            if (model != null && id == model.Id)
+            if (model != null)
             {
                await Connection.DeleteAsync(model);
             }
