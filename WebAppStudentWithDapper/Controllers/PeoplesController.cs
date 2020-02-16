@@ -1,5 +1,6 @@
 ﻿using Dapper.Contrib.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using WebAppStudentWithDapper.Models;
@@ -18,13 +19,19 @@ namespace WebAppStudentWithDapper.Controllers
       [HttpGet]
       public async Task<ActionResult> Index()
       {
-         return View(await Connection.GetAllAsync<People>());
+         IEnumerable<People> peoples = await Connection.GetAllAsync<People>();
+         return View(peoples);
       }
 
       [HttpGet]
       public async Task<ActionResult> Details(int id)
       {
-         return View(await Connection.GetAsync<People>(id));
+         People model = await Connection.GetAsync<People>(id);
+         if (model != null)
+         {
+            return View(model);
+         }
+         return RedirectToAction("Index");
       }
 
       [HttpGet]
@@ -39,9 +46,13 @@ namespace WebAppStudentWithDapper.Controllers
       {
          try
          {
-            var id = await Connection.InsertAsync(people);
-            TempData["Status"] = "Cadastrado com êxito";
-            return RedirectToAction(nameof(Edit), new { id });
+            if (ModelState.IsValid)
+            {
+               var id = await Connection.InsertAsync(people);
+               TempData["Status"] = "Cadastrado com êxito";
+               return RedirectToAction(nameof(Edit), new { id });
+            }
+            return View();
          }
          catch
          {
@@ -52,11 +63,16 @@ namespace WebAppStudentWithDapper.Controllers
       [HttpGet]
       public async Task<ActionResult> Edit(int id)
       {
+         People model = await Connection.GetAsync<People>(id);
          if (TempData["Status"] != null)
          {
             ViewBag.Status = TempData["Status"];
          }
-         return View(await Connection.GetAsync<People>(id));
+         if (model != null)
+         {
+            return View(model);
+         }
+         return RedirectToAction("Index");
       }
 
       [HttpPost]
@@ -65,9 +81,13 @@ namespace WebAppStudentWithDapper.Controllers
       {
          try
          {
-            await Connection.UpdateAsync(people);
-            TempData["Status"] = "Alterado com êxito";
-            return RedirectToAction(nameof(Edit), new { id });
+            if (ModelState.IsValid && id == people.Id)
+            {
+               await Connection.UpdateAsync(people);
+               TempData["Status"] = "Alterado com êxito";
+               return RedirectToAction(nameof(Edit), new { id });
+            }
+            return View();
          }
          catch
          {
@@ -78,7 +98,12 @@ namespace WebAppStudentWithDapper.Controllers
       [HttpGet]
       public async Task<ActionResult> Delete(int id)
       {
-         return View(await Connection.GetAsync<People>(id));
+         People model = await Connection.GetAsync<People>(id);
+         if (model != null)
+         {
+            return View(model);
+         }
+         return View();
       }
 
       [HttpPost]
@@ -88,7 +113,10 @@ namespace WebAppStudentWithDapper.Controllers
          try
          {
             People model = await Connection.GetAsync<People>(id);
-            await Connection.DeleteAsync(model);
+            if (model != null && id == model.Id)
+            {
+               await Connection.DeleteAsync(model);
+            }
             return RedirectToAction(nameof(Index));
          }
          catch
